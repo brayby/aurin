@@ -11,7 +11,7 @@ import {
 import { useFonts } from 'expo-font';
 import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 
-import { SettingsProvider } from '@/hooks/use-settings';
+import { SettingsProvider, useSettings } from '@/hooks/use-settings';
 import { Colors, Fonts } from '@/constants/theme';
 
 /** Navigation theme tinted to Aurín's warm palette (light only for v1). */
@@ -26,6 +26,40 @@ const AurinNavTheme = {
     border: Colors.light.border,
   },
 };
+
+/** The navigator — reads settings so it can gate onboarding vs the main app. */
+function RootNavigator() {
+  const { settings, hydrating } = useSettings();
+
+  // Hold on the (warm) blank screen until persisted settings load, so we don't
+  // flash onboarding at a returning user before `onboardingComplete` hydrates.
+  if (hydrating) return null;
+
+  const onboarded = settings.onboardingComplete;
+
+  return (
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: Colors.light.background },
+        headerTintColor: Colors.light.accent,
+        headerTitleStyle: { fontFamily: Fonts.serifSemibold, color: Colors.light.text },
+        headerShadowVisible: false,
+        headerBackButtonDisplayMode: 'minimal',
+        contentStyle: { backgroundColor: Colors.light.background },
+      }}>
+      <Stack.Protected guard={!onboarded}>
+        <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
+      </Stack.Protected>
+
+      <Stack.Protected guard={onboarded}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="card/[id]" options={{ title: '' }} />
+        <Stack.Screen name="reading/[spread]" options={{ title: 'Reading' }} />
+        <Stack.Screen name="ritual" options={{ presentation: 'modal', headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -42,19 +76,7 @@ export default function RootLayout() {
   return (
     <SettingsProvider>
       <ThemeProvider value={AurinNavTheme}>
-        <Stack
-          screenOptions={{
-            headerStyle: { backgroundColor: Colors.light.background },
-            headerTintColor: Colors.light.accent,
-            headerTitleStyle: { fontFamily: Fonts.serifSemibold, color: Colors.light.text },
-            headerShadowVisible: false,
-            headerBackButtonDisplayMode: 'minimal',
-            contentStyle: { backgroundColor: Colors.light.background },
-          }}>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="card/[id]" options={{ title: '' }} />
-          <Stack.Screen name="reading/[spread]" options={{ title: 'Reading' }} />
-        </Stack>
+        <RootNavigator />
       </ThemeProvider>
     </SettingsProvider>
   );

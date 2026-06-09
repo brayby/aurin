@@ -4,16 +4,34 @@ import { storage } from '@/lib/storage';
 
 const STORAGE_KEY = 'aurin.settings.v1';
 
+export type ExperienceLevel = 'new' | 'some' | 'seasoned';
+export type RitualTime = 'morning' | 'evening' | 'anytime';
+
 export type Settings = {
   /** Preferred deck tradition (Deck.id), or null for "no preference". */
   defaultDeckId: string | null;
   /** Preferred spread shape (a SPREADS key), or null. */
   defaultSpreadKey: string | null;
+  /** Whether the user has finished (or skipped) the first-run onboarding. */
+  onboardingComplete: boolean;
+  /** Tarot experience, captured during onboarding. */
+  experienceLevel: ExperienceLevel | null;
+  /** When the user likes to read — for future reminders. */
+  ritualTime: RitualTime | null;
+  /** What brings them to Aurín — a free intention picked during onboarding. */
+  intention: string | null;
+  /** ISO date (YYYY-MM-DD) of the last completed daily ritual, or null. */
+  lastRitualDate: string | null;
 };
 
 const DEFAULT_SETTINGS: Settings = {
   defaultDeckId: null,
   defaultSpreadKey: null,
+  onboardingComplete: false,
+  experienceLevel: null,
+  ritualTime: null,
+  intention: null,
+  lastRitualDate: null,
 };
 
 type SettingsContextValue = {

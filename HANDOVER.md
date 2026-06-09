@@ -2,7 +2,7 @@
 
 **Purpose:** everything a fresh Claude Code (or developer) needs to continue building Aurín on a different machine. This document is self-contained — it does **not** rely on any local Claude Code "memory", which does not transfer between machines.
 
-_Last updated: 2026-06-09, after Phase 1. Written on macOS; the project is moving to a Windows PC._
+_Last updated: 2026-06-09, after Phase 2. Written on macOS; the project is moving to a Windows PC._
 
 ---
 
@@ -12,9 +12,9 @@ Aurín is a **tarot companion app** being built as a native iOS + Android app wi
 
 It began as a single-file React web prototype (`reference/aurin-clean-final.jsx`, ~2,600 lines). We are doing a **full rewrite** — fresh code, but reusing the prototype's hand-written tarot *content* (78 card meanings, spreads, decks) as data.
 
-**Phases 0 and 1 are complete and committed.** The app scaffolds, typechecks clean, passes `expo-doctor` (21/21), and exports a valid iOS bundle. Phase 1 added real interactive screens — card detail, search + suit filter, a build-a-reading flow, persisted settings, and a reusable UI kit (see §8). It has **not** yet been seen running on a device/simulator (the Mac it was built on had no Xcode) — running it in Expo Go is the top priority for the next session.
+**Phases 0, 1 and 2 are complete and committed.** The app scaffolds, typechecks clean, passes `expo-doctor` (21/21), and exports a valid iOS bundle. Phase 1 added the interactive screens (card detail, search + suit filter, build-a-reading, persisted settings, UI kit); Phase 2 added first-run **onboarding** (gated with `Stack.Protected`) and the **daily ritual** modal (see §8). It has **not** yet been seen running on a device/simulator (the Mac it was built on had no Xcode) — running it in Expo Go is the top priority for the next session.
 
-**Next up: Phase 2** (onboarding & daily ritual — see §8). Backend and AI are deliberately deferred to Phase 3.
+**Next up: Phase 3** (Supabase backend + AI — see §8). This is where AI features (currently shown as disabled "Premium" teasers) get wired up.
 
 ---
 
@@ -201,6 +201,23 @@ src/
 
 The original `src/components/app-tabs.tsx` is unchanged and is what `(tabs)/_layout.tsx` renders. Navigation uses `router.push('/card/123')` / `router.push('/reading/three')` (typed-route strings).
 
+### 6.3 What Phase 2 added (file by file)
+
+```
+src/
+├─ app/
+│  ├─ _layout.tsx            # split into RootLayout (fonts) + RootNavigator (reads settings,
+│  │                         #   gates onboarding vs app with Stack.Protected; null while hydrating)
+│  ├─ onboarding.tsx         # 4-step skippable first-run flow (full-screen, no header)
+│  ├─ ritual.tsx             # daily ritual — presentation:'modal'
+│  └─ (tabs)/index.tsx       # Today now launches the ritual + reflects lastRitualDate
+├─ hooks/use-settings.tsx    # Settings gained: onboardingComplete, experienceLevel, ritualTime,
+│                            #   intention, lastRitualDate (+ ExperienceLevel / RitualTime types)
+└─ lib/date.ts               # todayISO() — local YYYY-MM-DD key for the daily ritual
+```
+
+`Stack.Protected guard={…}` (expo-router v56) is what swaps the onboarding screen for the main app when `onboardingComplete` flips — no manual redirect needed; it auto-routes to the anchor (`(tabs)` index).
+
 ---
 
 ## 7. Backend plan (Supabase) — for Phase 3, not yet built
@@ -224,8 +241,11 @@ Single Supabase project covers three needs:
   4. ✅ **Persisted settings** (default deck + default spread) — see §6.2. The Read tab floats/badges the chosen default spread.
   5. ✅ **Reusable primitives** in `src/components/ui/`: `Button`, `CardTile`, `Chip`, `SectionTitle`/`Eyebrow`, `CardPickerModal`.
   - **Routing was restructured:** the root `_layout.tsx` is now a **Stack**; the four tabs moved into a `src/app/(tabs)/` group (`(tabs)/_layout.tsx` renders the native tabs). Detail routes (`card/[id]`, `reading/[spread]`) push **over** the tab bar with a warm-themed header.
-- **Phase 2 — Onboarding & daily ritual. NEXT.** 4-screen skippable onboarding (experience level, ritual time, intention); daily ritual modal that prompts the *physical* deck. (Onboarding-complete + preferences can persist through the same settings/storage layer built in Phase 1.)
-- **Phase 3 — Backend & AI.** Supabase project, AI proxy Edge Function, TanStack Query wiring, anonymous auth, journal table. First real AI output — validate the prompts.
+- **Phase 2 — Onboarding & daily ritual ✅ DONE.**
+  1. ✅ **First-run onboarding** (`src/app/onboarding.tsx`) — one route, 4 internal steps (Welcome → Experience level → Ritual time → Intention), skippable at any point. Answers persist via `useSettings`. Gated with **`Stack.Protected guard={...}`** in the root layout on `settings.onboardingComplete`; the navigator holds on a blank warm screen while settings hydrate to avoid flashing onboarding at returning users.
+  2. ✅ **Daily ritual modal** (`src/app/ritual.tsx`, `presentation: 'modal'`) — an offline, physical-first sequence (settle → shuffle & draw from *your* deck → note the card via `CardPickerModal` → reflect). Reinforces "Aurín never draws". Records `lastRitualDate`; the Today tab launches it and shows a "✓ sat with today's card" state once done. AI reflection is a Premium teaser (Phase 3).
+  3. ✅ Settings gained a **"Replay the welcome"** action (sets `onboardingComplete=false` → guard redirects to onboarding) — handy for re-testing on device.
+- **Phase 3 — Backend & AI. NEXT.** Supabase project, AI proxy Edge Function, TanStack Query wiring, anonymous auth, journal table. First real AI output — validate the prompts. The "Weave these together" (reading) and ritual-reflection teasers are the two AI entry points to wire up.
 - **Phase 4 — Guided session (highest risk).** Breath animation (Reanimated), **native speech recognition** for spoken card names, reveal animation, camera reaction recording (expo-camera). ⚠️ **Build a manual-entry fallback first** — see §10.
 - **Phase 5 — Monetization.** RevenueCat IAP + `premium` entitlement + paywall (triggers when a free user hits an AI feature) + restore.
 - **Phase 6 — Store readiness.** Real app icon/splash (Daniel's branding), permission strings (camera/mic/speech), privacy policy, age rating (tarot ≈ 17+ on iOS), screenshots, EAS Build/Submit, TestFlight + Play internal testing.
@@ -263,7 +283,7 @@ Single Supabase project covers three needs:
 d6e3b2c  Add typed data layer (78 cards, 13 spreads, 8 decks) and pin Node 22
 c34ec01  Initial commit
 ```
-A GitHub remote now exists (`origin/main`). The list above is the Phase 0 history; Phase 1 lands as a further commit on top (routing restructure + interactive screens + UI kit + persistence).
+A GitHub remote exists at `https://github.com/brayby/aurin.git` (`origin/main`). The list above is the Phase 0 history; Phase 1 (routing restructure + interactive screens + UI kit + persistence) and Phase 2 (onboarding + ritual) each land as further commits on top, pushed to origin.
 
 ---
 
@@ -271,5 +291,5 @@ A GitHub remote now exists (`origin/main`). The list above is the Phase 0 histor
 
 1. Read this file and `reference/aurin-handoff.md`.
 2. From `aurin/`: `npm install`, then `npx tsc --noEmit` and `npx expo-doctor` to confirm a healthy baseline.
-3. `npx expo start` and preview in Expo Go on a phone — **the app has never been seen running; this is the priority.** Exercise the Phase 1 flows: tap a card → detail, search + suit filter, Read → pick a spread → assign cards via the picker, set a default deck/spread in Settings and confirm it persists across a reload. Note anything broken (fonts, native tabs, the `pageSheet` picker modal, layout).
-4. Then confirm **Phase 2** scope (§8) with the user — onboarding + the daily ritual modal — reusing the `src/lib/storage.ts` + `useSettings` layer for persistence.
+3. `npx expo start` and preview in Expo Go on a phone — **the app has never been seen running; this is the priority.** Exercise the flows: first launch should show **onboarding** (4 steps, skippable); then tap a card → detail, search + suit filter, Read → pick a spread → assign cards via the picker, run **Today → Begin today's ritual** (modal: settle → draw → note → reflect) and confirm Today then shows "✓ sat with today's card", set a default deck/spread in Settings and confirm persistence across reload. Use Settings → **"Replay the welcome"** to re-test onboarding. Watch the things most likely to surprise: native tabs, the `pageSheet`/`modal` presentations, fonts, and `Stack.Protected` gating.
+4. Then confirm **Phase 3** scope (§8) with the user — Supabase project + AI proxy Edge Function — and wire the two AI teasers ("Weave these together" on a reading; the ritual reflection).

@@ -1,9 +1,12 @@
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
+import { Button } from '@/components/ui';
 import { Colors, Fonts, Radius, Spacing, SuitColors } from '@/constants/theme';
 import { ALL_CARDS } from '@/data';
+import { useSettings } from '@/hooks/use-settings';
+import { todayISO } from '@/lib/date';
 
 /** Deterministic "card of the day" — stable for a given calendar date. */
 function cardOfTheDay() {
@@ -14,8 +17,10 @@ function cardOfTheDay() {
 
 export default function TodayScreen() {
   const router = useRouter();
+  const { settings } = useSettings();
   const card = cardOfTheDay();
   const suit = SuitColors[card.suit];
+  const ritualDoneToday = settings.lastRitualDate === todayISO();
 
   return (
     <Screen>
@@ -38,9 +43,21 @@ export default function TodayScreen() {
         <Text style={[styles.cardCta, { color: suit.accent }]}>Read more ›</Text>
       </Pressable>
 
-      <Text style={styles.ritualNote}>
-        Sit with your physical deck when you’re ready. Aurín is here to listen, not to draw for you.
-      </Text>
+      <View style={styles.ritual}>
+        {ritualDoneToday ? (
+          <>
+            <Text style={styles.ritualDone}>✓ You’ve sat with today’s card.</Text>
+            <Button label="Begin again" variant="ghost" onPress={() => router.push('/ritual')} />
+          </>
+        ) : (
+          <>
+            <Button label="Begin today’s ritual" onPress={() => router.push('/ritual')} />
+            <Text style={styles.ritualNote}>
+              A few quiet moments with your own deck. Aurín is here to listen, not to draw for you.
+            </Text>
+          </>
+        )}
+      </View>
     </Screen>
   );
 }
@@ -97,12 +114,21 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     textAlign: 'center',
   },
+  ritual: {
+    marginTop: Spacing.five,
+    gap: Spacing.three,
+  },
+  ritualDone: {
+    fontFamily: Fonts.serifSemibold,
+    fontSize: 17,
+    color: Colors.light.accent,
+    textAlign: 'center',
+  },
   ritualNote: {
     fontFamily: Fonts.serifItalic,
     fontSize: 15,
     lineHeight: 23,
     color: Colors.light.textSecondary,
     textAlign: 'center',
-    marginTop: Spacing.five,
   },
 });

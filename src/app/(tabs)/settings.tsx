@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
-import { Eyebrow, SectionTitle } from '@/components/ui';
+import { Button, Eyebrow, SectionTitle } from '@/components/ui';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import { DECKS, SPREADS, SPREAD_KEYS } from '@/data';
 import { useSettings } from '@/hooks/use-settings';
@@ -72,6 +72,15 @@ export default function SettingsScreen() {
           );
         })}
       </View>
+
+      <View style={styles.spacer} />
+
+      <Eyebrow>About</Eyebrow>
+      <Button
+        label="Replay the welcome"
+        variant="outline"
+        onPress={() => setSetting('onboardingComplete', false)}
+      />
 
       <Text style={styles.footnote}>Your choices are saved on this device.</Text>
     </Screen>
