@@ -1,30 +1,43 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 
+/**
+ * Aurín bottom navigation. Four sections:
+ *  Today (daily ritual) · Read (start a spread) · Cards (78-card reference) · Settings.
+ * Icons use SF Symbols on iOS and Material Symbols on Android.
+ */
 export default function AppTabs() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors.light;
 
   return (
     <NativeTabs
+      tintColor={colors.accent}
       backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
+      labelStyle={{ color: colors.textSecondary, selected: { color: colors.accent } }}>
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Today</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'sun.max', selected: 'sun.max.fill' }} md="wb_sunny" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="read">
+        <NativeTabs.Trigger.Label>Read</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="wand.and.stars" md="auto_awesome" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="cards">
+        <NativeTabs.Trigger.Label>Cards</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
+          sf={{ default: 'rectangle.stack', selected: 'rectangle.stack.fill' }}
+          md="grid_view"
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
+          sf={{ default: 'gearshape', selected: 'gearshape.fill' }}
+          md="settings"
         />
       </NativeTabs.Trigger>
     </NativeTabs>

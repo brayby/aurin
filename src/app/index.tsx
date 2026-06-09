@@ -1,98 +1,91 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { Screen } from '@/components/screen';
+import { Colors, Fonts, Radius, Spacing, SuitColors } from '@/constants/theme';
+import { ALL_CARDS } from '@/data';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
+/** Deterministic "card of the day" — stable for a given calendar date. */
+function cardOfTheDay() {
+  const now = new Date();
+  const daySeed = Number(`${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}`);
+  return ALL_CARDS[daySeed % ALL_CARDS.length];
 }
 
-export default function HomeScreen() {
+export default function TodayScreen() {
+  const card = cardOfTheDay();
+  const suit = SuitColors[card.suit];
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <Screen>
+      <Text style={styles.wordmark}>Aurín</Text>
+      <Text style={styles.tagline}>A moment of reflection, just for you.</Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <View style={[styles.card, { backgroundColor: suit.bg, borderColor: suit.accent }]}>
+        <Text style={styles.cardEyebrow}>Today’s card</Text>
+        <Text style={styles.cardSymbol}>{card.symbol}</Text>
+        <Text style={[styles.cardName, { color: suit.accent }]}>{card.name}</Text>
+        <Text style={styles.cardMeaning}>{card.meaning}</Text>
+      </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <Text style={styles.ritualNote}>
+        Sit with your physical deck when you’re ready. Aurín is here to listen, not to draw for you.
+      </Text>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+  wordmark: {
+    fontFamily: Fonts.displayBlack,
+    fontSize: 40,
+    color: Colors.light.accent,
+    textAlign: 'center',
+    marginTop: Spacing.three,
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+  tagline: {
+    fontFamily: Fonts.serifItalic,
+    fontSize: 18,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
+    marginTop: Spacing.one,
+    marginBottom: Spacing.five,
+  },
+  card: {
+    borderWidth: 1,
+    borderRadius: Radius.xl,
+    padding: Spacing.four,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    gap: Spacing.two,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  cardEyebrow: {
+    fontFamily: Fonts.serifSemibold,
+    fontSize: 13,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    color: Colors.light.textSecondary,
   },
-  title: {
+  cardSymbol: {
+    fontSize: 44,
+    color: Colors.light.text,
+  },
+  cardName: {
+    fontFamily: Fonts.display,
+    fontSize: 26,
     textAlign: 'center',
   },
-  code: {
-    textTransform: 'uppercase',
+  cardMeaning: {
+    fontFamily: Fonts.serif,
+    fontSize: 18,
+    lineHeight: 27,
+    color: Colors.light.text,
+    textAlign: 'center',
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  ritualNote: {
+    fontFamily: Fonts.serifItalic,
+    fontSize: 15,
+    lineHeight: 23,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
+    marginTop: Spacing.five,
   },
 });
