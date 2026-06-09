@@ -9,10 +9,10 @@ import {
   CrimsonText_600SemiBold,
 } from '@expo-google-fonts/crimson-text';
 import { useFonts } from 'expo-font';
-import { DefaultTheme, ThemeProvider } from 'expo-router';
+import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 
-import AppTabs from '@/components/app-tabs';
-import { Colors } from '@/constants/theme';
+import { SettingsProvider } from '@/hooks/use-settings';
+import { Colors, Fonts } from '@/constants/theme';
 
 /** Navigation theme tinted to Aurín's warm palette (light only for v1). */
 const AurinNavTheme = {
@@ -40,8 +40,22 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <ThemeProvider value={AurinNavTheme}>
-      <AppTabs />
-    </ThemeProvider>
+    <SettingsProvider>
+      <ThemeProvider value={AurinNavTheme}>
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: Colors.light.background },
+            headerTintColor: Colors.light.accent,
+            headerTitleStyle: { fontFamily: Fonts.serifSemibold, color: Colors.light.text },
+            headerShadowVisible: false,
+            headerBackButtonDisplayMode: 'minimal',
+            contentStyle: { backgroundColor: Colors.light.background },
+          }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="card/[id]" options={{ title: '' }} />
+          <Stack.Screen name="reading/[spread]" options={{ title: 'Reading' }} />
+        </Stack>
+      </ThemeProvider>
+    </SettingsProvider>
   );
 }

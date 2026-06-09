@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { Screen } from '@/components/screen';
 import { Colors, Fonts, Radius, Spacing, SuitColors } from '@/constants/theme';
@@ -12,6 +13,7 @@ function cardOfTheDay() {
 }
 
 export default function TodayScreen() {
+  const router = useRouter();
   const card = cardOfTheDay();
   const suit = SuitColors[card.suit];
 
@@ -20,12 +22,21 @@ export default function TodayScreen() {
       <Text style={styles.wordmark}>Aurín</Text>
       <Text style={styles.tagline}>A moment of reflection, just for you.</Text>
 
-      <View style={[styles.card, { backgroundColor: suit.bg, borderColor: suit.accent }]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Today’s card: ${card.name}`}
+        onPress={() => router.push(`/card/${card.id}`)}
+        style={({ pressed }) => [
+          styles.card,
+          { backgroundColor: suit.bg, borderColor: suit.accent },
+          pressed && styles.cardPressed,
+        ]}>
         <Text style={styles.cardEyebrow}>Today’s card</Text>
         <Text style={styles.cardSymbol}>{card.symbol}</Text>
         <Text style={[styles.cardName, { color: suit.accent }]}>{card.name}</Text>
         <Text style={styles.cardMeaning}>{card.meaning}</Text>
-      </View>
+        <Text style={[styles.cardCta, { color: suit.accent }]}>Read more ›</Text>
+      </Pressable>
 
       <Text style={styles.ritualNote}>
         Sit with your physical deck when you’re ready. Aurín is here to listen, not to draw for you.
@@ -56,6 +67,12 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     alignItems: 'center',
     gap: Spacing.two,
+  },
+  cardPressed: { opacity: 0.85 },
+  cardCta: {
+    fontFamily: Fonts.serifSemibold,
+    fontSize: 15,
+    marginTop: Spacing.two,
   },
   cardEyebrow: {
     fontFamily: Fonts.serifSemibold,

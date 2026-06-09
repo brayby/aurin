@@ -6,6 +6,7 @@
     "@expo-google-fonts/cinzel-decorative": "^0.4.1",
     "@expo-google-fonts/crimson-text": "^0.4.0",
     "@expo/ui": "~56.0.16",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~56.0.9",
     "expo-constants": "~56.0.17",
     "expo-device": "~56.0.4",

@@ -2,7 +2,7 @@
 
 **Purpose:** everything a fresh Claude Code (or developer) needs to continue building Aurín on a different machine. This document is self-contained — it does **not** rely on any local Claude Code "memory", which does not transfer between machines.
 
-_Last updated: 2026-06-09, after Phase 0. Written on macOS; the project is moving to a Windows PC._
+_Last updated: 2026-06-09, after Phase 1. Written on macOS; the project is moving to a Windows PC._
 
 ---
 
@@ -12,9 +12,9 @@ Aurín is a **tarot companion app** being built as a native iOS + Android app wi
 
 It began as a single-file React web prototype (`reference/aurin-clean-final.jsx`, ~2,600 lines). We are doing a **full rewrite** — fresh code, but reusing the prototype's hand-written tarot *content* (78 card meanings, spreads, decks) as data.
 
-**Phase 0 is complete and committed.** The app scaffolds, typechecks clean, passes `expo-doctor` (21/21), and exports a valid iOS bundle. It has not yet been seen running on a device/simulator (the Mac it was built on had no Xcode).
+**Phases 0 and 1 are complete and committed.** The app scaffolds, typechecks clean, passes `expo-doctor` (21/21), and exports a valid iOS bundle. Phase 1 added real interactive screens — card detail, search + suit filter, a build-a-reading flow, persisted settings, and a reusable UI kit (see §8). It has **not** yet been seen running on a device/simulator (the Mac it was built on had no Xcode) — running it in Expo Go is the top priority for the next session.
 
-**Next up: Phase 1** (see §8). Backend and AI are deliberately deferred to Phase 3.
+**Next up: Phase 2** (onboarding & daily ritual — see §8). Backend and AI are deliberately deferred to Phase 3.
 
 ---
 
@@ -104,8 +104,10 @@ Scaffolded with `create-expo-app` → landed on **Expo SDK 56** (newer than orig
 | Fonts | `@expo-google-fonts/cinzel-decorative`, `@expo-google-fonts/crimson-text`, `expo-font` | Loaded in root layout |
 | Misc template deps | `@expo/ui`, `expo-symbols`, `expo-glass-effect`, `expo-image`, `expo-blur`-style glass, `react-native-safe-area-context`, `react-native-screens`, `react-native-gesture-handler` | Available if useful |
 
+**Persistence — decision changed from the original plan.** The plan named `react-native-mmkv`, but **MMKV does not run in Expo Go** (it needs a custom dev build), and Expo Go is the team's day-to-day preview path. So Phase 1 persists via **`@react-native-async-storage/async-storage`** (Expo Go-compatible) behind a thin wrapper at `src/lib/storage.ts`. When the project moves to dev builds, swapping to MMKV means changing only that one file — callers use its async API. Don't add MMKV while Expo Go is still the preview path.
+
 **Planned but NOT yet added** (install when their phase arrives, via `npx expo install`):
-- `zustand` (global state) · `@tanstack/react-query` (server state) · `react-native-mmkv` (local persistence) — Phase 2/3
+- `zustand` (global state) · `@tanstack/react-query` (server state) — Phase 2/3. (Local persistence is already covered by `src/lib/storage.ts`; see above.)
 - `@supabase/supabase-js` — Phase 3
 - `react-native-purchases` (RevenueCat IAP) — Phase 5
 - `expo-camera`, `expo-av` (reaction recording) + a native speech-recognition module (e.g. `expo-speech-recognition` or `@react-native-voice/voice`) — Phase 4
@@ -172,6 +174,33 @@ The 78 cards / 13 spreads / 8 decks were **machine-extracted** from the prototyp
 
 Note: the old handoff said "5 decks" but the actual data has **8** (rws, thoth, marseille, osho, lenormand, wild-unknown, modern-witch, other) and **13** spreads.
 
+### 6.2 What Phase 1 added (file by file)
+
+```
+src/
+├─ app/
+│  ├─ _layout.tsx            # NOW a root Stack: SettingsProvider → ThemeProvider → Stack
+│  │                         #   screens: (tabs) [no header], card/[id], reading/[spread]
+│  ├─ (tabs)/                # the four tabs moved into this group
+│  │  ├─ _layout.tsx          # re-exports components/app-tabs (the NativeTabs)
+│  │  ├─ index.tsx            # Today — card-of-the-day now taps through to its detail
+│  │  ├─ read.tsx             # spreads tappable → reading/[spread]; floats/badges default spread
+│  │  ├─ cards.tsx            # search TextInput + suit Chip filter + tappable CardTiles
+│  │  └─ settings.tsx         # pick + persist default deck & default spread
+│  ├─ card/[id].tsx          # card detail: suit hero, keywords, upright + reversed
+│  └─ reading/[spread].tsx   # build-a-reading: assign card per position, per-position meanings
+├─ components/ui/            # the design-system primitives (barrel: components/ui/index.ts)
+│  ├─ button.tsx              # Button (solid / outline / ghost)
+│  ├─ card-tile.tsx          # CardTile — tappable suit-badged row
+│  ├─ chip.tsx               # Chip — selectable filter pill
+│  ├─ section-title.tsx      # SectionTitle + Eyebrow
+│  └─ card-picker-modal.tsx  # CardPickerModal — searchable full-screen card chooser
+├─ hooks/use-settings.tsx    # SettingsProvider + useSettings() (defaultDeckId, defaultSpreadKey)
+└─ lib/storage.ts            # async KV wrapper over AsyncStorage (MMKV swap-point — see §4)
+```
+
+The original `src/components/app-tabs.tsx` is unchanged and is what `(tabs)/_layout.tsx` renders. Navigation uses `router.push('/card/123')` / `router.push('/reading/three')` (typed-route strings).
+
 ---
 
 ## 7. Backend plan (Supabase) — for Phase 3, not yet built
@@ -188,13 +217,14 @@ Single Supabase project covers three needs:
 ## 8. Roadmap
 
 - **Phase 0 — Scaffold & data ✅ DONE.** Expo+TS, theme, fonts, native tabs, data port, 4 data-backed placeholder screens.
-- **Phase 1 — Real screens (offline, no AI/backend). NEXT.**
-  1. **Card detail** screen (full meaning, keywords, reversed) — add `src/app/card/[id].tsx` dynamic route; make Cards rows tappable.
-  2. **Search + suit filter** on the Cards tab.
-  3. **Build-a-reading flow:** pick spread → assign a card to each position → reading view showing per-position meanings. (No AI synthesis yet — that's the premium hook in Phase 3.)
-  4. **Persisted settings** (default deck/spread) via `react-native-mmkv`.
-  5. Reusable primitives: `Button`, `CardTile`, headings — formalize the design system.
-- **Phase 2 — Onboarding & daily ritual.** 4-screen skippable onboarding (experience level, ritual time, intention); daily ritual modal that prompts the *physical* deck.
+- **Phase 1 — Real screens (offline, no AI/backend) ✅ DONE.**
+  1. ✅ **Card detail** — `src/app/card/[id].tsx` dynamic route (hero, keywords, upright + reversed). Cards rows and the Today card-of-the-day are tappable.
+  2. ✅ **Search + suit filter** on the Cards tab (live `TextInput` + suit `Chip` row + result count).
+  3. ✅ **Build-a-reading flow** — Read tab spreads are tappable → `src/app/reading/[spread].tsx`: assign a card per position via a searchable `CardPickerModal`, see per-position meanings. AI synthesis shown as a disabled **Premium** teaser (real synthesis is Phase 3).
+  4. ✅ **Persisted settings** (default deck + default spread) — see §6.2. The Read tab floats/badges the chosen default spread.
+  5. ✅ **Reusable primitives** in `src/components/ui/`: `Button`, `CardTile`, `Chip`, `SectionTitle`/`Eyebrow`, `CardPickerModal`.
+  - **Routing was restructured:** the root `_layout.tsx` is now a **Stack**; the four tabs moved into a `src/app/(tabs)/` group (`(tabs)/_layout.tsx` renders the native tabs). Detail routes (`card/[id]`, `reading/[spread]`) push **over** the tab bar with a warm-themed header.
+- **Phase 2 — Onboarding & daily ritual. NEXT.** 4-screen skippable onboarding (experience level, ritual time, intention); daily ritual modal that prompts the *physical* deck. (Onboarding-complete + preferences can persist through the same settings/storage layer built in Phase 1.)
 - **Phase 3 — Backend & AI.** Supabase project, AI proxy Edge Function, TanStack Query wiring, anonymous auth, journal table. First real AI output — validate the prompts.
 - **Phase 4 — Guided session (highest risk).** Breath animation (Reanimated), **native speech recognition** for spoken card names, reveal animation, camera reaction recording (expo-camera). ⚠️ **Build a manual-entry fallback first** — see §10.
 - **Phase 5 — Monetization.** RevenueCat IAP + `premium` entitlement + paywall (triggers when a free user hits an AI feature) + restore.
@@ -233,7 +263,7 @@ Single Supabase project covers three needs:
 d6e3b2c  Add typed data layer (78 cards, 13 spreads, 8 decks) and pin Node 22
 c34ec01  Initial commit
 ```
-No remote configured yet (see §1.1). Working tree clean as of this handover (this file is the next commit).
+A GitHub remote now exists (`origin/main`). The list above is the Phase 0 history; Phase 1 lands as a further commit on top (routing restructure + interactive screens + UI kit + persistence).
 
 ---
 
@@ -241,5 +271,5 @@ No remote configured yet (see §1.1). Working tree clean as of this handover (th
 
 1. Read this file and `reference/aurin-handoff.md`.
 2. From `aurin/`: `npm install`, then `npx tsc --noEmit` and `npx expo-doctor` to confirm a healthy baseline.
-3. `npx expo start` and preview in Expo Go on a phone — **this is the first time the app will be seen running.** Note anything broken (fonts, tabs, layout).
-4. Confirm Phase 1 scope (§8) with the user, then start with the **card detail screen + tappable Cards rows**.
+3. `npx expo start` and preview in Expo Go on a phone — **the app has never been seen running; this is the priority.** Exercise the Phase 1 flows: tap a card → detail, search + suit filter, Read → pick a spread → assign cards via the picker, set a default deck/spread in Settings and confirm it persists across a reload. Note anything broken (fonts, native tabs, the `pageSheet` picker modal, layout).
+4. Then confirm **Phase 2** scope (§8) with the user — onboarding + the daily ritual modal — reusing the `src/lib/storage.ts` + `useSettings` layer for persistence.
