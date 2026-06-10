@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Screen } from '@/components/screen';
@@ -29,12 +30,7 @@ export default function SpreadScreen() {
           <View key={position}>
             <Text style={styles.positionName}>{position}</Text>
             <Text style={styles.positionDesc}>{spread.positionDesc[i]}</Text>
-            <TextInput
-              style={styles.note}
-              placeholder="Add a note…"
-              placeholderTextColor={Colors.light.textSecondary}
-              multiline
-            />
+            <NoteInput />
           </View>
         ))}
       </View>
@@ -42,10 +38,29 @@ export default function SpreadScreen() {
   );
 }
 
+/** Note input with a visible focus cue — the border picks up the accent. */
+function NoteInput() {
+  const [focused, setFocused] = useState(false);
+  return (
+    <TextInput
+      style={[styles.note, focused && styles.noteFocused]}
+      placeholder="Add a note…"
+      placeholderTextColor={Colors.light.textSecondary}
+      multiline
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+    />
+  );
+}
+
 /** Minimal back affordance — the nested stack header is hidden. */
 function BackLink() {
   return (
-    <Pressable accessibilityRole="button" onPress={() => router.back()} hitSlop={Spacing.two}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.back()}
+      hitSlop={Spacing.two}
+      style={({ pressed }) => pressed && styles.backPressed}>
       <Text style={styles.back}>‹ Back</Text>
     </Pressable>
   );
@@ -57,6 +72,9 @@ const styles = StyleSheet.create({
     fontSize: Type.bodySm,
     color: Colors.light.textSecondary,
     marginBottom: Spacing.three,
+  },
+  backPressed: {
+    opacity: 0.6,
   },
   notFound: {
     fontFamily: Fonts.serif,
@@ -100,5 +118,10 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     marginTop: Spacing.two,
     minHeight: 44,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  noteFocused: {
+    borderColor: Colors.light.accent,
   },
 });

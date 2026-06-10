@@ -18,8 +18,8 @@ const palette = {
   border: '#dcc9b4',
   /** Deep roasted-brown primary text. */
   text: '#2e1f14',
-  /** Muted brown secondary text. */
-  textSecondary: '#7a6553',
+  /** Muted brown secondary text — dark enough for ≥4.5:1 on every surface tint. */
+  textSecondary: '#6a5746',
   /** Terra-cotta — the single strong accent. */
   accent: '#c4714a',
   /** Accent text that sits on the accent fill. */

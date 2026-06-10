@@ -44,7 +44,11 @@ export default function CardDetailScreen() {
 /** Minimal back affordance — the nested stack header is hidden. */
 function BackLink() {
   return (
-    <Pressable accessibilityRole="button" onPress={() => router.back()} hitSlop={Spacing.two}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.back()}
+      hitSlop={Spacing.two}
+      style={({ pressed }) => pressed && styles.backPressed}>
       <Text style={styles.back}>‹ Back</Text>
     </Pressable>
   );
@@ -56,6 +60,9 @@ const styles = StyleSheet.create({
     fontSize: Type.bodySm,
     color: Colors.light.textSecondary,
     marginBottom: Spacing.three,
+  },
+  backPressed: {
+    opacity: 0.6,
   },
   notFound: {
     fontFamily: Fonts.serif,

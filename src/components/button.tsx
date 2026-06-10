@@ -2,8 +2,15 @@ import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'rea
 
 import { Colors, Fonts, Radius, Spacing, Type } from '@/constants/theme';
 
-/** Darkened terra-cotta for the pressed state of the accent fill. */
-const ACCENT_PRESSED = '#a85a38';
+/**
+ * Local darker terra-cotta fill for the button only. The shared `accent`
+ * token (#c4714a) passes WCAG AA solely as large/display text; the button
+ * label is 17px body text on the fill, so it needs ≥4.5:1 against
+ * `onAccent` (#fef8f2). #a85a38 measures 4.76:1 and the pressed shade
+ * #964f31 measures 5.76:1 — same terracotta hue family, just deeper.
+ */
+const ACCENT_FILL = '#a85a38';
+const ACCENT_PRESSED = '#964f31';
 
 type ButtonProps = {
   title: string;
@@ -32,7 +39,7 @@ export function Button({ title, onPress, disabled, style }: ButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: Colors.light.accent,
+    backgroundColor: ACCENT_FILL,
     borderRadius: Radius.md,
     minHeight: 48,
     alignItems: 'center',
