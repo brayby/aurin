@@ -1,6 +1,13 @@
 import { SymbolView } from 'expo-symbols';
 import { ReactNode } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  type AccessibilityState,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { PressableCard } from '@/components/pressable-card';
 import { Colors, Fonts, Spacing, Type } from '@/constants/theme';
@@ -11,15 +18,24 @@ type ListRowProps = {
   leading?: ReactNode;
   trailing?: ReactNode;
   onPress?: () => void;
+  accessibilityState?: AccessibilityState;
   style?: StyleProp<ViewStyle>;
 };
 
 /** Horizontal card row: optional leading, title/subtitle, optional trailing. */
-export function ListRow({ title, subtitle, leading, trailing, onPress, style }: ListRowProps) {
+export function ListRow({
+  title,
+  subtitle,
+  leading,
+  trailing,
+  onPress,
+  accessibilityState,
+  style,
+}: ListRowProps) {
   const showChevron = Boolean(onPress) && trailing === undefined;
 
   return (
-    <PressableCard onPress={onPress} style={style}>
+    <PressableCard onPress={onPress} accessibilityState={accessibilityState} style={style}>
       <View style={styles.row}>
         {leading}
         <View style={styles.body}>

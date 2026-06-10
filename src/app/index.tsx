@@ -1,7 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { StyleSheet, Text } from 'react-native';
 
+import { PressableCard } from '@/components/pressable-card';
 import { Screen } from '@/components/screen';
-import { Colors, Fonts, Radius, Spacing, SuitColors } from '@/constants/theme';
+import { SectionLabel } from '@/components/section-label';
+import { Colors, Fonts, Spacing, SuitColors, Type } from '@/constants/theme';
 import { ALL_CARDS } from '@/data';
 
 /** Deterministic "card of the day" — stable for a given calendar date. */
@@ -20,12 +23,14 @@ export default function TodayScreen() {
       <Text style={styles.wordmark}>Aurín</Text>
       <Text style={styles.tagline}>A moment of reflection, just for you.</Text>
 
-      <View style={[styles.card, { backgroundColor: suit.bg, borderColor: suit.accent }]}>
-        <Text style={styles.cardEyebrow}>Today’s card</Text>
+      <SectionLabel style={styles.eyebrow}>Today’s card</SectionLabel>
+      <PressableCard
+        onPress={() => router.push(`/cards/${card.id}`)}
+        style={{ backgroundColor: suit.bg }}>
         <Text style={styles.cardSymbol}>{card.symbol}</Text>
         <Text style={[styles.cardName, { color: suit.accent }]}>{card.name}</Text>
         <Text style={styles.cardMeaning}>{card.meaning}</Text>
-      </View>
+      </PressableCard>
 
       <Text style={styles.ritualNote}>
         Sit with your physical deck when you’re ready. Aurín is here to listen, not to draw for you.
@@ -37,55 +42,42 @@ export default function TodayScreen() {
 const styles = StyleSheet.create({
   wordmark: {
     fontFamily: Fonts.display,
-    fontSize: 40,
+    fontSize: Type.display,
     color: Colors.light.accent,
-    textAlign: 'center',
-    marginTop: Spacing.three,
+    marginTop: Spacing.six,
   },
   tagline: {
     fontFamily: Fonts.serifItalic,
-    fontSize: 18,
+    fontSize: Type.body,
     color: Colors.light.textSecondary,
-    textAlign: 'center',
     marginTop: Spacing.one,
     marginBottom: Spacing.five,
   },
-  card: {
-    borderWidth: 1,
-    borderRadius: Radius.xl,
-    padding: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  cardEyebrow: {
-    fontFamily: Fonts.serifSemibold,
-    fontSize: 13,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: Colors.light.textSecondary,
+  eyebrow: {
+    marginBottom: Spacing.two,
   },
   cardSymbol: {
-    fontSize: 44,
+    fontFamily: Fonts.display,
+    fontSize: Type.hero,
     color: Colors.light.text,
   },
   cardName: {
     fontFamily: Fonts.display,
-    fontSize: 26,
-    textAlign: 'center',
+    fontSize: Type.title,
+    marginTop: Spacing.two,
   },
   cardMeaning: {
     fontFamily: Fonts.serif,
-    fontSize: 18,
-    lineHeight: 27,
+    fontSize: Type.body,
+    lineHeight: 26,
     color: Colors.light.text,
-    textAlign: 'center',
+    marginTop: Spacing.two,
   },
   ritualNote: {
     fontFamily: Fonts.serifItalic,
-    fontSize: 15,
+    fontSize: Type.bodySm,
     lineHeight: 23,
     color: Colors.light.textSecondary,
-    textAlign: 'center',
     marginTop: Spacing.five,
   },
 });

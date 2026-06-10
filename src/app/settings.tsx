@@ -1,27 +1,47 @@
+import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { ListRow } from '@/components/list-row';
 import { Screen } from '@/components/screen';
-import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
+import { SectionLabel } from '@/components/section-label';
+import { Colors, Fonts, Spacing, Type } from '@/constants/theme';
 import { DECKS } from '@/data';
 
 export default function SettingsScreen() {
+  // Data has no persisted default — start on the first deck (Rider-Waite-Smith).
+  const [selectedId, setSelectedId] = useState(DECKS[0].id);
+
   return (
     <Screen>
       <Text style={styles.title}>Settings</Text>
 
-      <Text style={styles.sectionLabel}>Deck tradition</Text>
+      <SectionLabel style={styles.sectionLabel}>Deck tradition</SectionLabel>
       <View style={styles.list}>
-        {DECKS.map((deck) => (
-          <View key={deck.id} style={styles.deck}>
-            <Text style={styles.deckSymbol}>{deck.symbol}</Text>
-            <View style={styles.deckBody}>
-              <Text style={styles.deckName}>{deck.name}</Text>
-              <Text style={styles.deckMeta} numberOfLines={1}>
-                {deck.tradition}
-              </Text>
-            </View>
-          </View>
-        ))}
+        {DECKS.map((deck) => {
+          const selected = deck.id === selectedId;
+          return (
+            <ListRow
+              key={deck.id}
+              title={deck.name}
+              subtitle={deck.tradition}
+              leading={<Text style={styles.deckSymbol}>{deck.symbol}</Text>}
+              trailing={
+                selected ? (
+                  <SymbolView
+                    name={{ ios: 'checkmark', android: 'check', web: 'check' }}
+                    size={16}
+                    weight="semibold"
+                    tintColor={Colors.light.accent}
+                  />
+                ) : null
+              }
+              onPress={() => setSelectedId(deck.id)}
+              accessibilityState={{ selected }}
+              style={selected ? styles.selectedRow : undefined}
+            />
+          );
+        })}
       </View>
 
       <Text style={styles.footnote}>Defaults aren’t wired to storage yet — that lands in Phase 2.</Text>
@@ -30,33 +50,31 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  title: { fontFamily: Fonts.display, fontSize: 30, color: Colors.light.accent, marginBottom: Spacing.three },
+  title: {
+    fontFamily: Fonts.display,
+    fontSize: Type.display,
+    color: Colors.light.accent,
+    marginBottom: Spacing.three,
+  },
   sectionLabel: {
-    fontFamily: Fonts.serifSemibold,
-    fontSize: 13,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    color: Colors.light.textSecondary,
     marginBottom: Spacing.two,
   },
-  list: { gap: Spacing.two },
-  deck: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
-    backgroundColor: Colors.light.backgroundElement,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-    borderRadius: Radius.md,
-    padding: Spacing.three,
+  list: {
+    gap: Spacing.two,
   },
-  deckSymbol: { fontSize: 22, color: Colors.light.accent, width: 28, textAlign: 'center' },
-  deckBody: { flex: 1 },
-  deckName: { fontFamily: Fonts.serifSemibold, fontSize: 17, color: Colors.light.text },
-  deckMeta: { fontFamily: Fonts.serif, fontSize: 14, color: Colors.light.textSecondary },
+  deckSymbol: {
+    fontFamily: Fonts.display,
+    fontSize: Type.titleSm,
+    color: Colors.light.accent,
+    width: 28,
+    textAlign: 'center',
+  },
+  selectedRow: {
+    backgroundColor: Colors.light.backgroundSelected,
+  },
   footnote: {
     fontFamily: Fonts.serifItalic,
-    fontSize: 14,
+    fontSize: Type.bodySm,
     color: Colors.light.textSecondary,
     marginTop: Spacing.four,
     textAlign: 'center',

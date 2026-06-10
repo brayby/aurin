@@ -1,16 +1,24 @@
 import { ReactNode } from 'react';
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type AccessibilityState,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 type PressableCardProps = {
   children: ReactNode;
   onPress?: () => void;
+  accessibilityState?: AccessibilityState;
   style?: StyleProp<ViewStyle>;
 };
 
 /** Warm surface card. Pressable (with pressed feedback) when `onPress` is given. */
-export function PressableCard({ children, onPress, style }: PressableCardProps) {
+export function PressableCard({ children, onPress, accessibilityState, style }: PressableCardProps) {
   if (!onPress) {
     return <View style={[styles.card, style]}>{children}</View>;
   }
@@ -18,6 +26,7 @@ export function PressableCard({ children, onPress, style }: PressableCardProps) 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={accessibilityState}
       onPress={onPress}
       style={({ pressed }) => [styles.card, styles.pressable, pressed && styles.pressed, style]}>
       {children}
