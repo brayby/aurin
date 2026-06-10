@@ -36,7 +36,7 @@ export default function TodayScreen() {
 
 const styles = StyleSheet.create({
   wordmark: {
-    fontFamily: Fonts.displayBlack,
+    fontFamily: Fonts.display,
     fontSize: 40,
     color: Colors.light.accent,
     textAlign: 'center',

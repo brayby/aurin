@@ -24,6 +24,8 @@ const palette = {
   accent: '#c4714a',
   /** Accent text that sits on the accent fill. */
   onAccent: '#fef8f2',
+  /** Muted antique gold — gilded details and flourishes. */
+  gold: '#a8884f',
 } as const;
 
 export const Colors = {
@@ -34,15 +36,16 @@ export const Colors = {
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 /**
- * Suit colour system — each suit gets a tinted surface, an accent, and a soft glow.
- * Tinted versions of the warm palette; not literal mysticism.
+ * Suit colour system — each suit gets a tinted surface and an accent.
+ * Warm, earthen tints of the core palette; every accent-on-bg pair meets
+ * WCAG AA (≥4.5:1) for normal text.
  */
 export const SuitColors = {
-  'Major Arcana': { bg: '#f0e6d3', accent: '#8b5e3c', glow: '#c4714a44' },
-  Wands: { bg: '#fdf0e0', accent: '#c4714a', glow: '#c4714a33' },
-  Cups: { bg: '#e8f0f8', accent: '#4a7ab5', glow: '#4a7ab533' },
-  Swords: { bg: '#eef2ee', accent: '#4a7a4a', glow: '#4a7a4a33' },
-  Pentacles: { bg: '#f5f0e8', accent: '#8b7355', glow: '#8b735533' },
+  'Major Arcana': { bg: '#efe4d0', accent: '#6f4e37' },
+  Wands: { bg: '#f6e4d6', accent: '#94431f' },
+  Cups: { bg: '#f3e7da', accent: '#7d5a3c' },
+  Swords: { bg: '#efe9dd', accent: '#5c5036' },
+  Pentacles: { bg: '#f2ead9', accent: '#7a611f' },
 } as const;
 
 /**
@@ -50,15 +53,27 @@ export const SuitColors = {
  * strings in sync with the `useFonts` map in the root layout.
  */
 export const Fonts = {
-  /** Cinzel Decorative — headings, logo, card names. */
-  display: 'CinzelDecorative_700Bold',
-  displayRegular: 'CinzelDecorative_400Regular',
-  displayBlack: 'CinzelDecorative_900Black',
-  /** Crimson Text — body copy. */
-  serif: 'CrimsonText_400Regular',
-  serifSemibold: 'CrimsonText_600SemiBold',
-  serifItalic: 'CrimsonText_400Regular_Italic',
+  /** Cormorant Garamond — headings, logo, card names. */
+  display: 'CormorantGaramond_600SemiBold',
+  displayMedium: 'CormorantGaramond_500Medium',
+  displayItalic: 'CormorantGaramond_500Medium_Italic',
+  /** Lora — body copy. */
+  serif: 'Lora_400Regular',
+  serifMedium: 'Lora_500Medium',
+  serifSemibold: 'Lora_600SemiBold',
+  serifItalic: 'Lora_400Regular_Italic',
   mono: Platform.select({ ios: 'ui-monospace', default: 'monospace' }),
+} as const;
+
+/** Type scale — font sizes shared across screens. */
+export const Type = {
+  caption: 13,
+  bodySm: 15,
+  body: 17,
+  titleSm: 21,
+  title: 26,
+  display: 34,
+  hero: 42,
 } as const;
 
 export const Spacing = {
